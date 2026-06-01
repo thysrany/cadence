@@ -227,6 +227,24 @@ label.fld{display:block;font-size:12px;font-weight:600;color:var(--ink-soft);mar
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#FCF9F3;padding:12px 22px;border-radius:30px;font-size:14px;font-weight:500;box-shadow:var(--shadow-lg);opacity:0;transition:.3s;z-index:200;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
+/* ===== SIGN-IN SCREEN ===== */
+.signin-screen{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;padding:24px;
+  background:radial-gradient(120% 90% at 85% -10%, rgba(206,83,38,.09), transparent 55%),radial-gradient(100% 80% at 0% 110%, rgba(76,122,79,.07), transparent 50%),var(--bg);}
+.signin-card{background:var(--surface);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow-lg);width:100%;max-width:380px;padding:40px 34px;text-align:center;animation:rise .5s cubic-bezier(.2,.7,.3,1)}
+.signin-card .logo{font-family:'Fraunces';font-weight:600;font-size:42px;letter-spacing:-.02em;line-height:1}
+.signin-card .logo .dot{color:var(--accent)}
+.signin-card .tag{color:var(--muted);font-size:14px;margin-top:8px}
+.signin-card .lead{font-family:'Fraunces';font-style:italic;font-size:17px;color:var(--ink-soft);margin:30px 0 22px}
+.gbtn{width:100%;display:flex;align-items:center;justify-content:center;gap:11px;font-family:inherit;font-size:15px;font-weight:600;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:13px;padding:14px;cursor:pointer;transition:.15s}
+.gbtn:hover{border-color:var(--accent);box-shadow:0 6px 18px -10px rgba(206,83,38,.5)}
+.gbtn:active{transform:translateY(1px)}
+.gbtn svg{width:19px;height:19px}
+.signin-card .fine{font-size:12px;color:var(--muted);margin-top:20px;line-height:1.5}
+.signin-card .note{font-size:13px;border-radius:11px;padding:11px 14px;margin-top:16px;display:none}
+.signin-card .note.warn{display:block;background:var(--accent-soft);color:var(--accent-deep)}
+.signin-card .note.err{display:block;background:#F6D9D2;color:#A93F18}
+.signin-card .spin{display:none;margin-top:18px;color:var(--muted);font-size:13px}
+
 /* ===== MOBILE ===== */
 @media(max-width:600px){
   .wrap{padding:0 14px 80px}
@@ -249,7 +267,21 @@ label.fld{display:block;font-size:12px;font-weight:600;color:var(--ink-soft);mar
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="signin-screen" id="signinScreen">
+  <div class="signin-card">
+    <div class="logo">Cadence<span class="dot">.</span></div>
+    <div class="tag">your daily productivity hub</div>
+    <div class="lead">Sign in to pick up where you left off.</div>
+    <button class="gbtn" onclick="window._fb&&window._fb.signIn()">
+      <svg viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.3-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16 19 13 24 13c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.6 6.1 29.6 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.5 0 10.4-2.1 14.1-5.5l-6.5-5.5c-2.1 1.6-4.8 2.5-7.6 2.5-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.6 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.5 5.5c-.5.4 6.3-4.6 6.3-15.1 0-1.3-.1-2.3-.4-3.5z"/></svg>
+      Continue with Google
+    </button>
+    <div class="note" id="signinNote"></div>
+    <div class="spin" id="signinSpin">Signing in…</div>
+    <div class="fine">Your tasks and habits sync to your Google account, so they're there on any device you sign in from.</div>
+  </div>
+</div>
+<div class="wrap" id="appWrap" style="display:none">
   <header>
     <div class="brand">
       <h1>Cadence<span class="dot">.</span></h1>
@@ -260,6 +292,7 @@ label.fld{display:block;font-size:12px;font-weight:600;color:var(--ink-soft);mar
       <div class="io-row">
         <button onclick="exportData()">↓ Export data</button>
         <button onclick="document.getElementById('importFile').click()">↑ Import</button>
+        <button id="signoutBtn" style="display:none" onclick="window._fb&&window._fb.signOut()">Sign out</button>
         <input type="file" id="importFile" accept="application/json" style="display:none" onchange="importData(event)">
       </div>
     </div>
@@ -423,9 +456,12 @@ function load(){
   }catch(e){ return defaultState(); }
 }
 function save(){
-  try{ localStorage.setItem(KEY, JSON.stringify(state)); }
-  catch(e){ toast('⚠ Could not save (open the file from your computer to enable saving)'); }
+  try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){}
+  if(window._fb && window._fbUser && window._fbUser.uid){
+    window._fb.save(window._fbUser.uid, cloudData());
+  }
 }
+function cloudData(){ var d=Object.assign({}, state); delete d.ui; d.updatedAt=Date.now(); return d; }
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 
 /* ============================================================
@@ -952,7 +988,148 @@ function init(){
   fillCatSelect();
   renderAll();
 }
-init();
+function enterApp(){
+  var ss=document.getElementById('signinScreen'); if(ss)ss.style.display='none';
+  var aw=document.getElementById('appWrap'); if(aw)aw.style.display='';
+  var so=document.getElementById('signoutBtn');
+  if(so){ so.style.display=''; if(window._fbUser&&window._fbUser.displayName) so.textContent='Sign out · '+window._fbUser.displayName.split(' ')[0]; }
+  init();
+}
+function showSignin(){
+  var ss=document.getElementById('signinScreen'); if(ss)ss.style.display='flex';
+  var aw=document.getElementById('appWrap'); if(aw)aw.style.display='none';
+}
+
+/* ============================================================
+   GOOGLE SIGN-IN + FIRESTORE SYNC  (same setup as SpeakDeck)
+   Cadence saves to its own "cadence" collection, so it never
+   touches SpeakDeck's data.
+============================================================ */
+(function(){
+  var PROJECT   = 'speakdeck-bb76b';
+  var API_KEY   = 'AIzaSyAnDJ8sBzs8kY9xwN9yj545H7FJtbVHjCA';
+  var CLIENT_ID = '55277159527-53fbmbof24n7rhs44h6qtp58atcgqe6i.apps.googleusercontent.com';
+  var COLLECTION= 'cadence';
+  var FS_URL    = 'https://firestore.googleapis.com/v1/projects/'+PROJECT+'/databases/(default)/documents/'+COLLECTION+'/';
+  var USER_KEY  = 'cadence_user';
+  var _tokenClient=null, _refreshTimer=null;
+
+  function getSavedUser(){ try{var u=localStorage.getItem(USER_KEY);return u?JSON.parse(u):null;}catch(e){return null;} }
+  function saveUser(u){ try{localStorage.setItem(USER_KEY,JSON.stringify(u));}catch(e){} }
+  function clearUser(){ try{localStorage.removeItem(USER_KEY);}catch(e){} }
+
+  function fsGet(uid, token){ return fetch(FS_URL+uid,{headers:{'Authorization':'Bearer '+token}}).then(function(r){return r.ok?r.json():null;}); }
+  function fsSave(uid, token, data){ return fetch(FS_URL+uid+'?key='+API_KEY,{method:'PATCH',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({fields:toFields(data)})}); }
+
+  function toFields(o){ var f={}; Object.keys(o).forEach(function(k){ f[k]=toVal(o[k]); }); return f; }
+  function toVal(v){
+    if(v===null||v===undefined) return {nullValue:null};
+    if(typeof v==='boolean')    return {booleanValue:v};
+    if(typeof v==='number')     return Number.isInteger(v)?{integerValue:''+v}:{doubleValue:v};
+    if(typeof v==='string')     return {stringValue:v};
+    if(Array.isArray(v))        return {arrayValue:{values:v.map(toVal)}};
+    if(typeof v==='object')     return {mapValue:{fields:toFields(v)}};
+    return {stringValue:''+v};
+  }
+  function fromFields(f){ if(!f)return{}; var o={}; Object.keys(f).forEach(function(k){ o[k]=fromVal(f[k]); }); return o; }
+  function fromVal(v){
+    if(!v) return null;
+    if('nullValue'in v)    return null;
+    if('booleanValue'in v) return v.booleanValue;
+    if('integerValue'in v) return Number(v.integerValue);
+    if('doubleValue'in v)  return v.doubleValue;
+    if('stringValue'in v)  return v.stringValue;
+    if('arrayValue'in v)   return (v.arrayValue.values||[]).map(fromVal);
+    if('mapValue'in v)     return fromFields(v.mapValue.fields||{});
+    return null;
+  }
+
+  function applyCloud(data){
+    if(!data) return;
+    var keepUi=state.ui; delete data.updatedAt;
+    state=Object.assign(defaultState(), data);
+    state.ui=Object.assign(defaultState().ui, keepUi||{});
+    try{localStorage.setItem(KEY, JSON.stringify(state));}catch(e){}
+  }
+
+  function note(msg,kind){ var n=document.getElementById('signinNote'); if(n){n.textContent=msg;n.className='note '+(kind||'');} }
+  function spin(on){ var s=document.getElementById('signinSpin'); if(s)s.style.display=on?'block':'none'; }
+
+  function loadGIS(cb){
+    if(window.google&&google.accounts){ cb(); return; }
+    var s=document.createElement('script'); s.src='https://accounts.google.com/gsi/client';
+    s.onload=cb; s.onerror=function(){ spin(false); note('Sign-in unavailable. Check your connection.','err'); };
+    document.head.appendChild(s);
+  }
+  function scheduleRefresh(sec){ clearTimeout(_refreshTimer); _refreshTimer=setTimeout(silentRefresh, Math.max(0,(sec-300)*1000)); }
+  function silentRefresh(){ if(_tokenClient&&window._fbUser) _tokenClient.requestAccessToken({prompt:''}); }
+  function applyToken(resp, info){
+    var token=resp.access_token, exp=resp.expires_in||3600;
+    var u={uid:info.uid,email:info.email,displayName:info.displayName,photoURL:info.photoURL,idToken:token,tokenExpiry:Date.now()+exp*1000};
+    window._fbUser=u; saveUser(u); scheduleRefresh(exp); return token;
+  }
+  function getToken(){ var u=window._fbUser||getSavedUser(); if(!u||!u.idToken)return null; if(u.tokenExpiry&&Date.now()>u.tokenExpiry-60000)return null; return u.idToken; }
+
+  function doSignIn(){
+    spin(true); note('','');
+    loadGIS(function(){
+      _tokenClient=google.accounts.oauth2.initTokenClient({
+        client_id:CLIENT_ID,
+        scope:'profile email https://www.googleapis.com/auth/datastore',
+        callback:function(resp){
+          if(resp.error){ spin(false); note('Sign-in failed. Please try again.','err'); return; }
+          var token=resp.access_token;
+          fetch('https://www.googleapis.com/oauth2/v3/userinfo',{headers:{'Authorization':'Bearer '+token}})
+            .then(function(r){return r.json();})
+            .then(function(info){
+              var ui={uid:info.sub,email:info.email,displayName:info.name,photoURL:info.picture};
+              applyToken(resp, ui);
+              fsGet(ui.uid, token).then(function(doc){
+                if(doc&&doc.fields){ applyCloud(fromFields(doc.fields)); }
+                else { fsSave(ui.uid, token, cloudData()).catch(function(){}); }
+                spin(false); enterApp();
+              }).catch(function(){ spin(false); enterApp(); });
+            }).catch(function(){ spin(false); note('Could not load your Google profile.','err'); });
+        }
+      });
+      _tokenClient.requestAccessToken({prompt:'select_account'});
+    });
+  }
+  function doSignOut(){
+    try{ if(window.google&&google.accounts&&window._fbUser&&window._fbUser.idToken) google.accounts.oauth2.revoke(window._fbUser.idToken,function(){}); }catch(e){}
+    window._fbUser=null; clearUser();
+    var so=document.getElementById('signoutBtn'); if(so)so.style.display='none';
+    showSignin();
+  }
+
+  window._fb={
+    signIn:doSignIn, signOut:doSignOut,
+    save:function(uid,data){
+      var token=getToken(); if(!token)return;
+      clearTimeout(window._cloudSaveTimer);
+      window._cloudSaveTimer=setTimeout(function(){ fsSave(uid,token,data).catch(function(){}); }, 800);
+    }
+  };
+
+  /* restore session on load */
+  var saved=getSavedUser();
+  if(saved && saved.idToken && !(saved.tokenExpiry && Date.now()>saved.tokenExpiry-60000)){
+    window._fbUser=saved;
+    var remaining=saved.tokenExpiry?Math.floor((saved.tokenExpiry-Date.now())/1000):3600;
+    loadGIS(function(){
+      _tokenClient=google.accounts.oauth2.initTokenClient({client_id:CLIENT_ID,scope:'profile email https://www.googleapis.com/auth/datastore',
+        callback:function(resp){ if(!resp.error) applyToken(resp,{uid:saved.uid,email:saved.email,displayName:saved.displayName,photoURL:saved.photoURL}); }});
+      scheduleRefresh(remaining);
+    });
+    fsGet(saved.uid, saved.idToken).then(function(doc){
+      if(doc&&doc.fields) applyCloud(fromFields(doc.fields));
+      enterApp();
+    }).catch(function(){ enterApp(); });
+  } else {
+    clearUser();
+    showSignin();
+  }
+})();
 </script>
 </body>
 </html>
