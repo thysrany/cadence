@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- Cadence build v6 · 2026-06-01 · list-checked-sink -->
+<!-- Cadence build v7 · 2026-06-01 · sync-safety (timestamp merge + flush) -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cadence · Daily Productivity (v6)</title>
+<title>Cadence · Daily Productivity (v7)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -304,7 +304,7 @@ label.fld{display:block;font-size:12px;font-weight:600;color:var(--ink-soft);mar
     </button>
     <div class="note" id="signinNote"></div>
     <div class="spin" id="signinSpin">Signing in…</div>
-    <div class="fine">Your tasks and habits sync to your Google account, so they're there on any device you sign in from.</div><div class="fine" style="margin-top:6px;opacity:.7">version 6</div>
+    <div class="fine">Your tasks and habits sync to your Google account, so they're there on any device you sign in from.</div><div class="fine" style="margin-top:6px;opacity:.7">version 7</div>
   </div>
 </div>
 <div class="wrap" id="appWrap" style="display:none">
@@ -525,12 +525,13 @@ function load(){
   }catch(e){ return defaultState(); }
 }
 function save(){
+  state.updatedAt = Date.now();
   try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){}
   if(window._fb && window._fbUser && window._fbUser.uid){
     window._fb.save(window._fbUser.uid, cloudData());
   }
 }
-function cloudData(){ var d=Object.assign({}, state); delete d.ui; d.updatedAt=Date.now(); return d; }
+function cloudData(){ var d=Object.assign({}, state); delete d.ui; d.updatedAt = state.updatedAt || Date.now(); return d; }
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 
 /* ============================================================
@@ -1314,10 +1315,38 @@ function showSignin(){
 
   function applyCloud(data){
     if(!data) return;
-    var keepUi=state.ui; delete data.updatedAt;
+    var keepUi=state.ui;
+    var stamp=data.updatedAt||Date.now();
+    delete data.updatedAt;
     state=Object.assign(defaultState(), data);
+    state.updatedAt=stamp;
     state.ui=Object.assign(defaultState().ui, keepUi||{});
     try{localStorage.setItem(KEY, JSON.stringify(state));}catch(e){}
+  }
+  // Decide whether cloud or local wins, by timestamp — never overwrite newer local notes
+  function mergeCloud(doc, uid, token){
+    var localT = state.updatedAt || 0;
+    if(doc && doc.fields){
+      var cloud = fromFields(doc.fields);
+      var cloudT = cloud.updatedAt || 0;
+      if(cloudT > localT){ applyCloud(cloud); }            // cloud is newer -> use it
+      else { fsSave(uid, token, cloudData()).catch(function(){}); }  // local is newer/equal -> keep local, push it up
+    } else {
+      fsSave(uid, token, cloudData()).catch(function(){});  // nothing in cloud yet -> upload local
+    }
+  }
+  function flushCloud(){
+    if(!(window._fbUser && window._fbUser.uid)) return;
+    var token=getToken(); if(!token) return;
+    clearTimeout(window._cloudSaveTimer);
+    try{
+      fetch(FS_URL+window._fbUser.uid+'?key='+API_KEY,{
+        method:'PATCH',
+        headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+        body:JSON.stringify({fields:toFields(cloudData())}),
+        keepalive:true
+      }).catch(function(){});
+    }catch(e){}
   }
 
   function note(msg,kind){ var n=document.getElementById('signinNote'); if(n){n.textContent=msg;n.className='note '+(kind||'');} }
@@ -1353,8 +1382,7 @@ function showSignin(){
               var ui={uid:info.sub,email:info.email,displayName:info.name,photoURL:info.picture};
               applyToken(resp, ui);
               fsGet(ui.uid, token).then(function(doc){
-                if(doc&&doc.fields){ applyCloud(fromFields(doc.fields)); }
-                else { fsSave(ui.uid, token, cloudData()).catch(function(){}); }
+                mergeCloud(doc, ui.uid, token);
                 spin(false); enterApp();
               }).catch(function(){ spin(false); enterApp(); });
             }).catch(function(){ spin(false); note('Could not load your Google profile.','err'); });
@@ -1371,13 +1399,14 @@ function showSignin(){
   }
 
   window._fb={
-    signIn:doSignIn, signOut:doSignOut,
+    signIn:doSignIn, signOut:doSignOut, flush:flushCloud,
     save:function(uid,data){
-      var token=getToken(); if(!token)return;
       clearTimeout(window._cloudSaveTimer);
-      window._cloudSaveTimer=setTimeout(function(){ fsSave(uid,token,data).catch(function(){}); }, 800);
+      window._cloudSaveTimer=setTimeout(function(){ var token=getToken(); if(!token)return; fsSave(uid,token,data).catch(function(){}); }, 800);
     }
   };
+  document.addEventListener('visibilitychange',function(){ if(document.visibilityState==='hidden') flushCloud(); });
+  window.addEventListener('pagehide', flushCloud);
 
   /* restore session on load */
   var saved=getSavedUser();
@@ -1390,7 +1419,7 @@ function showSignin(){
       scheduleRefresh(remaining);
     });
     fsGet(saved.uid, saved.idToken).then(function(doc){
-      if(doc&&doc.fields) applyCloud(fromFields(doc.fields));
+      mergeCloud(doc, saved.uid, saved.idToken);
       enterApp();
     }).catch(function(){ enterApp(); });
   } else {
