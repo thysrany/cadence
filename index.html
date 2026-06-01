@@ -227,6 +227,31 @@ label.fld{display:block;font-size:12px;font-weight:600;color:var(--ink-soft);mar
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#FCF9F3;padding:12px 22px;border-radius:30px;font-size:14px;font-weight:500;box-shadow:var(--shadow-lg);opacity:0;transition:.3s;z-index:200;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
+/* ===== TAP-TO-EDIT / DELETE-IN-DIALOG / SUBTABS / QUOTES ===== */
+.tap{cursor:pointer}
+.task .body.tap:hover .txt{color:var(--accent-deep)}
+.hnm.tap{cursor:pointer}
+.hnm.tap:hover{color:var(--accent)}
+.insp.tap{cursor:pointer}
+.dump .dt.tap{cursor:pointer}
+.dump .dt.tap:hover{color:var(--accent-deep)}
+.mbtns .btn-del{margin-right:auto;background:transparent;color:#A93F18;border:1px solid #E6BBAE}
+.mbtns .btn-del:hover{background:#F6D9D2}
+.subtabs{display:flex;gap:6px;margin-bottom:18px;background:var(--surface-2);border:1px solid var(--line);border-radius:13px;padding:5px;max-width:300px}
+.subtab{flex:1;border:none;background:transparent;font-family:inherit;font-size:14px;font-weight:600;color:var(--ink-soft);padding:9px;border-radius:9px;cursor:pointer;transition:.15s}
+.subtab.on{background:var(--surface);color:var(--accent);box-shadow:var(--shadow)}
+.subtab:hover:not(.on){color:var(--ink)}
+.quote-feature{position:relative;background:var(--surface-2);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:0 14px 14px 0;padding:26px 28px 22px}
+.quote-feature .qmark{position:absolute;top:-6px;left:12px;font-family:'Fraunces';font-size:60px;color:var(--accent-soft);line-height:1}
+.quote-feature .qtext{font-family:'Fraunces';font-weight:500;font-style:italic;font-size:22px;line-height:1.5;color:var(--ink);padding-left:24px}
+.quote-feature .qauthor{margin-top:12px;font-weight:600;color:var(--accent-deep);padding-left:24px}
+.quote-feature .qbtns{display:flex;gap:8px;margin-top:18px;padding-left:24px}
+.quote-list{display:flex;flex-direction:column;gap:8px}
+.qrow{display:flex;align-items:center;gap:12px;background:var(--surface-2);border:1px solid var(--line-soft);border-radius:11px;padding:11px 14px}
+.qrow-txt{flex:1}
+.qrow-q{font-size:14px;color:var(--ink)}
+.qrow-a{display:block;font-size:12px;color:var(--muted);margin-top:2px}
+
 /* ===== SIGN-IN SCREEN ===== */
 .signin-screen{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;padding:24px;
   background:radial-gradient(120% 90% at 85% -10%, rgba(206,83,38,.09), transparent 55%),radial-gradient(100% 80% at 0% 110%, rgba(76,122,79,.07), transparent 50%),var(--bg);}
@@ -307,6 +332,10 @@ label.fld{display:block;font-size:12px;font-weight:600;color:var(--ink-soft);mar
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 00-4 12.74c.5.4.9 1 1 1.6V18h6v-1.66c.1-.6.5-1.2 1-1.6A7 7 0 0012 2z"/></svg>Inspiration</button>
     <button class="tab-btn" data-tab="dump" onclick="switchTab('dump')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a9 9 0 00-9 9c0 4 3 7 5 8v2h8v-2c2-1 5-4 5-8a9 9 0 00-9-9z"/><path d="M9 21h6"/></svg>Brain Dump</button>
+    <button class="tab-btn" data-tab="projects" onclick="switchTab('projects')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>Projects</button>
+    <button class="tab-btn" data-tab="lists" onclick="switchTab('lists')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Lists</button>
   </nav>
 
   <main>
@@ -391,10 +420,29 @@ label.fld{display:block;font-size:12px;font-weight:600;color:var(--ink-soft);mar
 
     <!-- ============ INSPIRATION ============ -->
     <section class="section" id="tab-insp">
-      <div class="card">
-        <div class="card-h"><h2>Inspiration</h2><button class="btn btn-ghost btn-sm" onclick="newInsp()">+ Subject</button></div>
-        <p class="muted" style="font-size:13px;margin-bottom:18px">A place for ideas, quotes, themes and notes worth keeping. Each subject has a title and a body.</p>
-        <div class="insp-grid" id="inspList"></div>
+      <div class="subtabs" id="inspSubtabs">
+        <button class="subtab on" data-sub="inspiration" onclick="setInspTab('inspiration')">Inspiration</button>
+        <button class="subtab" data-sub="quotes" onclick="setInspTab('quotes')">Quotes</button>
+      </div>
+
+      <div id="inspPanel">
+        <div class="card">
+          <div class="card-h"><h2>Inspiration</h2><button class="btn btn-ghost btn-sm" onclick="newInsp()">+ Subject</button></div>
+          <p class="muted" style="font-size:13px;margin-bottom:18px">A place for ideas, themes and notes worth keeping. Each subject has a title and a body. Tap one to edit it.</p>
+          <div class="insp-grid" id="inspList"></div>
+        </div>
+      </div>
+
+      <div id="quotesPanel" style="display:none">
+        <div class="card">
+          <div class="card-h"><h2>Productivity Quotes</h2></div>
+          <p class="muted" style="font-size:13px;margin-bottom:18px">A little fuel. Copy any quote to share it.</p>
+          <div class="quote-feature" id="quoteFeature"></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><h3>All quotes</h3></div>
+          <div class="quote-list" id="quoteList"></div>
+        </div>
       </div>
     </section>
 
@@ -412,6 +460,24 @@ label.fld{display:block;font-size:12px;font-weight:600;color:var(--ink-soft);mar
         <div class="card-h"><h2>Captured</h2><button class="btn btn-ghost btn-sm" onclick="manageCats()">Categories</button></div>
         <div class="dumpfilter" id="dumpFilter"></div>
         <div class="dump-list" id="dumpList"></div>
+      </div>
+    </section>
+
+    <!-- ============ PROJECTS ============ -->
+    <section class="section" id="tab-projects">
+      <div class="card">
+        <div class="card-h"><h2>Projects</h2><button class="btn btn-ghost btn-sm" onclick="newProject()">+ Project</button></div>
+        <p class="muted" style="font-size:13px;margin-bottom:16px">Group related tasks. Give a task a due date and it shows up in your To-Do; leave it blank and it just lives here. A project moves to <b>Completed</b> once every task is done.</p>
+        <div id="projectList"></div>
+      </div>
+    </section>
+
+    <!-- ============ LISTS ============ -->
+    <section class="section" id="tab-lists">
+      <div class="card">
+        <div class="card-h"><h2>Lists</h2><button class="btn btn-ghost btn-sm" onclick="newList()">+ List</button></div>
+        <p class="muted" style="font-size:13px;margin-bottom:16px">Fixed checklists and references — packing lists, groceries, anything you reuse. No due dates, no progress tracking.</p>
+        <div id="listList"></div>
       </div>
     </section>
   </main>
@@ -442,8 +508,10 @@ function defaultState(){
     inspirations: [],
     dumps: [],
     dumpCats: ['Idea','To-Do','Work','Personal','Random'],
+    projects: [],            // { id, name, color, tasks:[{id,text,due,done,doneDate}] }
+    lists: [],               // { id, name, color, items:[{id,text,done}] }
     meta: { lastOpen: today() },
-    ui: { whenSel:'today', dumpFilter:'All', openFolders:{} }
+    ui: { whenSel:'today', dumpFilter:'All', openFolders:{}, openProjects:{}, openLists:{}, inspTab:'inspiration' }
   };
 }
 function load(){
@@ -573,69 +641,80 @@ function editTask(id){
     t.eod = eod || !vals.time;
     t.time = t.eod ? null : (vals.time||null);
     save(); renderTodo();
-  });
+  },{ onDelete:()=>confirmModal('Delete this task?', ()=>delTask(id)) });
 }
 function fmtTime(hm){
   if(!hm) return '';
   let [h,m]=hm.split(':').map(Number); const ap=h>=12?'PM':'AM'; h=h%12||12;
   return h+':'+String(m).padStart(2,'0')+' '+ap;
 }
-function taskRow(t,dateLabel){
+
+// Unified to-do items: standalone tasks + project tasks that have a due date
+function todoItems(){
+  const items=[];
+  state.tasks.forEach(t=>items.push({kind:'task',id:t.id,text:t.text,date:t.date,eod:t.eod,time:t.time,done:t.done,doneDate:t.doneDate}));
+  (state.projects||[]).forEach(p=>p.tasks.forEach(t=>{
+    if(t.due) items.push({kind:'project',id:t.id,projectId:p.id,text:t.text,date:t.due,eod:!t.time,time:t.time||null,done:t.done,doneDate:t.doneDate,badge:{name:p.name,color:p.color}});
+  }));
+  return items;
+}
+function todoRow(it,dateLabel){
   const now=new Date();
-  const late = !t.done && !t.eod && t.time && t.date===today() &&
-    (now.getHours()*60+now.getMinutes() > (+t.time.split(':')[0]*60 + +t.time.split(':')[1]));
+  const late = !it.done && !it.eod && it.time && it.date===today() &&
+    (now.getHours()*60+now.getMinutes() > (+it.time.split(':')[0]*60 + +it.time.split(':')[1]));
+  const overdueProj = it.kind==='project' && !it.done && it.date<today();
   const datePill = dateLabel ? '<span class="tag" style="background:var(--surface);border:1px solid var(--line);color:var(--muted)">'+esc(dateLabel)+'</span>' : '';
-  const dl = t.eod ? '<span class="tag eod">end of day</span>'
-            : (t.time ? '<span class="tag time">'+fmtTime(t.time)+(late?' · overdue':'')+'</span>' : '');
-  const meta = (datePill||dl) ? '<div class="meta">'+datePill+dl+'</div>' : '';
-  return '<li class="task'+(t.done?' done':'')+(late?' ':'')+'">'+
-    '<div class="check" onclick="toggleTask(\''+t.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>'+
-    '<div class="body"><div class="txt">'+esc(t.text)+'</div>'+
-      meta+'</div>'+
-    '<div class="acts"><button class="icon-btn" onclick="editTask(\''+t.id+'\')" title="Edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></button>'+
-    '<button class="icon-btn" onclick="delTask(\''+t.id+'\')" title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button></div></li>';
+  const badge = it.badge ? '<span class="tag" style="background:'+it.badge.color+'1f;color:'+it.badge.color+'">'+esc(it.badge.name)+'</span>' : '';
+  const dl = it.eod ? '<span class="tag eod">end of day</span>'
+            : (it.time ? '<span class="tag time">'+fmtTime(it.time)+(late?' · overdue':'')+'</span>' : '');
+  const od = overdueProj ? '<span class="tag late">overdue</span>' : '';
+  const meta = (datePill||badge||dl||od) ? '<div class="meta">'+datePill+badge+dl+od+'</div>' : '';
+  const toggle = it.kind==='project' ? "toggleProjTask('"+it.projectId+"','"+it.id+"')" : "toggleTask('"+it.id+"')";
+  const edit   = it.kind==='project' ? "editProjTask('"+it.projectId+"','"+it.id+"')" : "editTask('"+it.id+"')";
+  return '<li class="task'+(it.done?' done':'')+'">'+
+    '<div class="check" onclick="'+toggle+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>'+
+    '<div class="body tap" onclick="'+edit+'"><div class="txt">'+esc(it.text)+'</div>'+meta+'</div>'+
+    '</li>';
 }
 function renderTodo(){
   const t=today();
-  const todays=state.tasks.filter(x=>x.date===t);
-  const pending=todays.filter(x=>!x.done);
-  const done=todays.filter(x=>x.done);
+  const items=todoItems();
+  const todayPending=items.filter(it=>!it.done && it.date<=t);
+  const todayDone=items.filter(it=>it.done && it.doneDate===t);
 
-  // counts
   document.getElementById('todayCounts').innerHTML =
-    '<div class="count-pill pend"><span class="n">'+pending.length+'</span><span class="l">pending</span></div>'+
-    '<div class="count-pill done"><span class="n">'+done.length+'</span><span class="l">done</span></div>';
+    '<div class="count-pill pend"><span class="n">'+todayPending.length+'</span><span class="l">pending</span></div>'+
+    '<div class="count-pill done"><span class="n">'+todayDone.length+'</span><span class="l">done</span></div>';
 
-  // today list
   const sortT=(a,b)=>{ if(a.eod&&!b.eod)return 1; if(!a.eod&&b.eod)return -1; return (a.time||'').localeCompare(b.time||''); };
   let html='';
-  if(pending.length){ html+='<ul class="tasklist">'+pending.sort(sortT).map(taskRow).join('')+'</ul>'; }
+  if(todayPending.length){ html+='<ul class="tasklist">'+todayPending.sort(sortT).map(it=>todoRow(it)).join('')+'</ul>'; }
   else html+='<div class="empty"><span>✦</span>Nothing pending. Enjoy the clear runway.</div>';
-  if(done.length){
-    html+='<div class="done-head"><span>Done for the day</span><span class="line"></span><span>'+done.length+'</span></div>';
-    html+='<ul class="tasklist">'+done.map(taskRow).join('')+'</ul>';
+  if(todayDone.length){
+    html+='<div class="done-head"><span>Done for the day</span><span class="line"></span><span>'+todayDone.length+'</span></div>';
+    html+='<ul class="tasklist">'+todayDone.map(it=>todoRow(it)).join('')+'</ul>';
   }
   document.getElementById('todayList').innerHTML=html;
 
-  // upcoming
   const tm=tomorrow(), eow=endOfWeek();
-  const tmTasks=state.tasks.filter(x=>!x.done && x.date===tm).sort(sortT);
-  const weekTasks=state.tasks.filter(x=>!x.done && x.date>tm && x.date<=eow).sort((a,b)=>a.date.localeCompare(b.date)||sortT(a,b));
-  const laterTasks=state.tasks.filter(x=>!x.done && x.date>eow).sort((a,b)=>a.date.localeCompare(b.date)||sortT(a,b));
+  const byDate=(a,b)=>a.date.localeCompare(b.date)||sortT(a,b);
+  const tmItems=items.filter(it=>!it.done && it.date===tm).sort(sortT);
+  const weekItems=items.filter(it=>!it.done && it.date>tm && it.date<=eow).sort(byDate);
+  const laterItems=items.filter(it=>!it.done && it.date>eow).sort(byDate);
   let up='';
-  up+=bucket('Tomorrow', tmTasks, true);
-  up+=bucket('Rest of the week', weekTasks, true);
-  if(laterTasks.length) up+=bucket('Later', laterTasks, true);
-  if(!tmTasks.length && !weekTasks.length && !laterTasks.length)
+  up+=bucket('Tomorrow', tmItems, true);
+  up+=bucket('Rest of the week', weekItems, true);
+  if(laterItems.length) up+=bucket('Later', laterItems, true);
+  if(!tmItems.length && !weekItems.length && !laterItems.length)
     up='<div class="empty"><span>◔</span>No tasks scheduled ahead yet.</div>';
   document.getElementById('upcomingList').innerHTML=up;
 }
 function bucket(label, list, showDate){
   let h='<div class="bucket"><div class="bucket-h"><span class="lbl">'+label+'</span><span class="cnt">'+list.length+'</span></div>';
   if(!list.length) h+='<div class="muted" style="font-size:13px;padding:2px 2px 4px">—</div>';
-  else h+='<ul class="tasklist">'+list.map(t=>{
-    const dstr = showDate ? prettyDate(t.date).replace(/, \d{4}$/,'') : null;
-    return taskRow(t,dstr);
+  else h+='<ul class="tasklist">'+list.map(it=>{
+    const dstr = showDate ? prettyDate(it.date).replace(/, \d{4}$/,'') : null;
+    return todoRow(it,dstr);
   }).join('')+'</ul>';
   h+='</div>';
   return h;
@@ -717,15 +796,12 @@ function renderFolders(){
         '<span class="fnm">'+esc(f.name)+'</span>'+
         '<span class="fcount">'+habits.length+'</span>'+
         '<button class="icon-btn" onclick="event.stopPropagation();editFolder(\''+f.id+'\')" title="Edit folder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></button>'+
-        '<button class="icon-btn" onclick="event.stopPropagation();delFolder(\''+f.id+'\')" title="Delete folder"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>'+
         '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M9 18l6-6-6-6"/></svg>'+
       '</div>'+
       '<div class="folder-body">'+
         (habits.length?habits.map(h=>
           '<div class="habit-row'+(h.inRoutine?' in':'')+'">'+
-            '<span class="hnm">'+esc(h.name)+'</span>'+
-            '<button class="icon-btn" onclick="editHabit(\''+h.id+'\')" title="Edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></button>'+
-            '<button class="icon-btn" onclick="delHabit(\''+h.id+'\')" title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>'+
+            '<span class="hnm tap" onclick="editHabit(\''+h.id+'\')">'+esc(h.name)+'</span>'+
             '<button class="add-btn" onclick="addToRoutine(\''+h.id+'\')">'+(h.inRoutine?'✓ In routine':'+ Add')+'</button>'+
           '</div>'
         ).join(''):'<div class="muted" style="font-size:13px;padding:4px 2px">No habits in this folder yet.</div>')+
@@ -751,15 +827,12 @@ function editFolder(id){
   openModal('Edit folder',[{key:'name',label:'Folder name',type:'text',value:f.name}],vals=>{
     if(!vals.name.trim()) return;
     f.name=vals.name.trim(); if(vals.color)f.color=vals.color; save(); renderHabits();
-  },{color:f.color});
+  },{color:f.color, onDelete:()=>confirmModal('Delete "'+f.name+'"? Its habits will also be removed.', ()=>delFolder(id))});
 }
 function delFolder(id){
-  const f=state.folders.find(x=>x.id===id);
-  confirmModal('Delete "'+(f?f.name:'')+'"? Its habits will also be removed.',()=>{
-    state.folders=state.folders.filter(x=>x.id!==id);
-    state.habits=state.habits.filter(h=>h.folderId!==id);
-    save(); renderHabits();
-  });
+  state.folders=state.folders.filter(x=>x.id!==id);
+  state.habits=state.habits.filter(h=>h.folderId!==id);
+  save(); renderHabits();
 }
 function newHabit(folderId){
   openModal('New habit',[{key:'name',label:'Habit',type:'text',placeholder:'e.g. Read 20 minutes'}],vals=>{
@@ -772,15 +845,12 @@ function editHabit(id){
   const h=state.habits.find(x=>x.id===id); if(!h) return;
   openModal('Edit habit',[{key:'name',label:'Habit',type:'text',value:h.name}],vals=>{
     if(!vals.name.trim()) return; h.name=vals.name.trim(); save(); renderHabits();
-  });
+  },{onDelete:()=>confirmModal('Delete habit "'+h.name+'"?', ()=>delHabit(id))});
 }
 function delHabit(id){
-  const h=state.habits.find(x=>x.id===id);
-  confirmModal('Delete habit "'+(h?h.name:'')+'"?',()=>{
-    state.habits=state.habits.filter(x=>x.id!==id);
-    Object.keys(state.routineLog).forEach(d=>{ state.routineLog[d]=state.routineLog[d].filter(x=>x!==id); });
-    save(); renderHabits();
-  });
+  state.habits=state.habits.filter(x=>x.id!==id);
+  Object.keys(state.routineLog).forEach(d=>{ state.routineLog[d]=state.routineLog[d].filter(x=>x!==id); });
+  save(); renderHabits();
 }
 
 /* ============================================================
@@ -790,9 +860,7 @@ function renderInsp(){
   const el=document.getElementById('inspList');
   if(!state.inspirations.length){ el.innerHTML='<div class="empty"><span>✎</span>No subjects yet. Capture an idea worth keeping.</div>'; return; }
   el.innerHTML=state.inspirations.map(s=>
-    '<div class="insp"><div class="acts">'+
-      '<button class="icon-btn" onclick="editInsp(\''+s.id+'\')" title="Edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></button>'+
-      '<button class="icon-btn" onclick="delInsp(\''+s.id+'\')" title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button></div>'+
+    '<div class="insp tap" onclick="editInsp(\''+s.id+'\')">'+
       '<div class="it">'+esc(s.title)+'</div>'+
       (s.text?'<div class="ix">'+esc(s.text)+'</div>':'')+'</div>'
   ).join('');
@@ -815,10 +883,61 @@ function editInsp(id){
   ],vals=>{
     if(!vals.title.trim()) return;
     s.title=vals.title.trim(); s.text=vals.text.trim(); save(); renderInsp();
-  });
+  },{onDelete:()=>confirmModal('Delete this subject?', ()=>delInsp(id))});
 }
-function delInsp(id){
-  confirmModal('Delete this subject?',()=>{ state.inspirations=state.inspirations.filter(x=>x.id!==id); save(); renderInsp(); });
+function delInsp(id){ state.inspirations=state.inspirations.filter(x=>x.id!==id); save(); renderInsp(); }
+
+/* Inspiration sub-tabs + Quotes */
+function setInspTab(which){
+  state.ui.inspTab=which; save();
+  document.querySelectorAll('#inspSubtabs .subtab').forEach(b=>b.classList.toggle('on', b.dataset.sub===which));
+  document.getElementById('inspPanel').style.display = which==='inspiration'?'block':'none';
+  document.getElementById('quotesPanel').style.display = which==='quotes'?'block':'none';
+}
+const QUOTES=[
+  {t:"The secret of getting ahead is getting started.",a:"Mark Twain"},
+  {t:"Either you run the day or the day runs you.",a:"Jim Rohn"},
+  {t:"Well done is better than well said.",a:"Benjamin Franklin"},
+  {t:"It always seems impossible until it's done.",a:"Nelson Mandela"},
+  {t:"The way to get started is to quit talking and begin doing.",a:"Walt Disney"},
+  {t:"Action is the foundational key to all success.",a:"Pablo Picasso"},
+  {t:"Lost time is never found again.",a:"Benjamin Franklin"},
+  {t:"Focus on being productive instead of busy.",a:"Tim Ferriss"},
+  {t:"Start where you are. Use what you have. Do what you can.",a:"Arthur Ashe"},
+  {t:"A year from now you may wish you had started today.",a:"Karen Lamb"},
+  {t:"Don't watch the clock; do what it does. Keep going.",a:"Sam Levenson"},
+  {t:"Motivation gets you started. Habit keeps you going.",a:"Jim Rohn"},
+  {t:"Your future is created by what you do today.",a:"Robert Kiyosaki"},
+  {t:"You don't have to be great to start, but you have to start to be great.",a:"Zig Ziglar"},
+  {t:"Do the hard jobs first. The easy jobs take care of themselves.",a:"Dale Carnegie"},
+  {t:"Discipline is choosing between what you want now and what you want most.",a:"Abraham Lincoln"},
+  {t:"Ordinary people think merely of spending time. Great people think of using it.",a:"Arthur Schopenhauer"},
+  {t:"The best way to get something done is to begin.",a:"Proverb"}
+];
+let _quoteIdx = Math.floor(Math.random()*QUOTES.length);
+function quoteString(q){ return '"'+q.t+'" — '+q.a; }
+function renderQuotes(){
+  const q=QUOTES[_quoteIdx];
+  const feat=document.getElementById('quoteFeature');
+  if(feat){
+    feat.innerHTML='<div class="qmark">"</div><div class="qtext">'+esc(q.t)+'</div><div class="qauthor">— '+esc(q.a)+'</div>'+
+      '<div class="qbtns"><button class="btn btn-primary btn-sm" onclick="copyQuote('+_quoteIdx+')">Copy</button>'+
+      '<button class="btn btn-ghost btn-sm" onclick="newQuote()">↻ New quote</button></div>';
+  }
+  const list=document.getElementById('quoteList');
+  if(list){
+    list.innerHTML=QUOTES.map((x,i)=>
+      '<div class="qrow"><div class="qrow-txt"><span class="qrow-q">'+esc(x.t)+'</span><span class="qrow-a">'+esc(x.a)+'</span></div>'+
+      '<button class="icon-btn" title="Copy" onclick="copyQuote('+i+')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg></button></div>'
+    ).join('');
+  }
+}
+function newQuote(){ let n=_quoteIdx; while(n===_quoteIdx && QUOTES.length>1) n=Math.floor(Math.random()*QUOTES.length); _quoteIdx=n; renderQuotes(); }
+function copyQuote(i){
+  const s=quoteString(QUOTES[i]);
+  const done=()=>toast('Quote copied');
+  if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(s).then(done).catch(fb); } else fb();
+  function fb(){ try{ const ta=document.createElement('textarea'); ta.value=s; ta.style.cssText='position:fixed;opacity:0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); done(); }catch(e){ toast('Copy failed'); } }
 }
 
 /* ============================================================
@@ -845,7 +964,8 @@ function editDump(id){
   openModal('Edit note',[
     {key:'text',label:'Note',type:'text',value:d.text},
     {key:'cat',label:'Category',type:'select',value:d.cat,options:state.dumpCats}
-  ],vals=>{ if(!vals.text.trim())return; d.text=vals.text.trim(); d.cat=vals.cat; save(); renderDump(); });
+  ],vals=>{ if(!vals.text.trim())return; d.text=vals.text.trim(); d.cat=vals.cat; save(); renderDump(); },
+  {onDelete:()=>confirmModal('Delete this note?', ()=>delDump(id))});
 }
 function sendToTodo(id){
   const d=state.dumps.find(x=>x.id===id); if(!d) return;
@@ -869,11 +989,9 @@ function renderDump(){
     const col=catColor(d.cat);
     return '<div class="dump">'+
       '<span class="cat" style="background:'+col+'1f;color:'+col+'">'+esc(d.cat)+'</span>'+
-      '<span class="dt">'+esc(d.text)+'</span>'+
+      '<span class="dt tap" onclick="editDump(\''+d.id+'\')">'+esc(d.text)+'</span>'+
       '<div class="acts">'+
         '<button class="send-btn" onclick="sendToTodo(\''+d.id+'\')" title="Send to To-Do"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>To-Do</button>'+
-        '<button class="icon-btn" onclick="editDump(\''+d.id+'\')" title="Edit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></button>'+
-        '<button class="icon-btn" onclick="delDump(\''+d.id+'\')" title="Delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>'+
       '</div></div>';
   }).join('');
 }
@@ -891,11 +1009,158 @@ function manageCats(){
 }
 
 /* ============================================================
+   PROJECTS — folders of tasks; tasks with a due date flow to To-Do
+============================================================ */
+function projectDone(p){ return p.tasks.length>0 && p.tasks.every(t=>t.done); }
+function toggleProjOpen(id){ state.ui.openProjects[id]=!state.ui.openProjects[id]; save(); renderProjects(); }
+function newProject(){
+  openModal('New project',[{key:'name',label:'Project name',type:'text',placeholder:'e.g. Website launch'}],vals=>{
+    if(!vals.name.trim()) return;
+    state.projects.push({id:uid(),name:vals.name.trim(),color:vals.color||FOLDER_COLORS[state.projects.length%FOLDER_COLORS.length],tasks:[]});
+    save(); renderProjects();
+  },{color:FOLDER_COLORS[state.projects.length%FOLDER_COLORS.length]});
+}
+function editProject(id){
+  const p=state.projects.find(x=>x.id===id); if(!p) return;
+  openModal('Edit project',[{key:'name',label:'Project name',type:'text',value:p.name}],vals=>{
+    if(!vals.name.trim()) return; p.name=vals.name.trim(); if(vals.color)p.color=vals.color; save(); renderProjects(); renderTodo();
+  },{color:p.color, onDelete:()=>confirmModal('Delete "'+p.name+'" and all its tasks?', ()=>delProject(id))});
+}
+function delProject(id){ state.projects=state.projects.filter(x=>x.id!==id); save(); renderProjects(); renderTodo(); }
+function newProjTask(pid){
+  const p=state.projects.find(x=>x.id===pid); if(!p) return;
+  openModal('New task',[
+    {key:'text',label:'Task',type:'text',placeholder:'What needs doing?'},
+    {key:'due',label:'Due date — optional (adds it to your To-Do)',type:'date',value:''},
+    {key:'time',label:'Time — optional (orders it in your To-Do)',type:'time',value:''}
+  ],vals=>{
+    if(!vals.text.trim()) return;
+    p.tasks.push({id:uid(),text:vals.text.trim(),due:vals.due||null,time:vals.time||null,done:false,doneDate:null});
+    state.ui.openProjects[pid]=true; save(); renderProjects(); renderTodo();
+  });
+}
+function editProjTask(pid,tid){
+  const p=state.projects.find(x=>x.id===pid); if(!p) return;
+  const t=p.tasks.find(x=>x.id===tid); if(!t) return;
+  openModal('Edit task',[
+    {key:'text',label:'Task',type:'text',value:t.text},
+    {key:'due',label:'Due date — optional (adds it to your To-Do)',type:'date',value:t.due||''},
+    {key:'time',label:'Time — optional (orders it in your To-Do)',type:'time',value:t.time||''}
+  ],vals=>{
+    if(!vals.text.trim()) return;
+    t.text=vals.text.trim(); t.due=vals.due||null; t.time=vals.time||null; save(); renderProjects(); renderTodo();
+  },{onDelete:()=>confirmModal('Delete this task?', ()=>delProjTask(pid,tid))});
+}
+function delProjTask(pid,tid){ const p=state.projects.find(x=>x.id===pid); if(!p)return; p.tasks=p.tasks.filter(x=>x.id!==tid); save(); renderProjects(); renderTodo(); }
+function toggleProjTask(pid,tid){
+  const p=state.projects.find(x=>x.id===pid); if(!p) return;
+  const t=p.tasks.find(x=>x.id===tid); if(!t) return;
+  t.done=!t.done; t.doneDate=t.done?today():null; save(); renderProjects(); renderTodo();
+}
+function projectCard(p){
+  const open=state.ui.openProjects[p.id];
+  const doneN=p.tasks.filter(t=>t.done).length;
+  const sorted=p.tasks.slice().sort((a,b)=>{ if(a.done!==b.done)return a.done?1:-1; return (a.due||'9999').localeCompare(b.due||'9999')||(a.time||'99:99').localeCompare(b.time||'99:99'); });
+  return '<div class="folder'+(open?' open':'')+'">'+
+    '<div class="folder-h" onclick="toggleProjOpen(\''+p.id+'\')">'+
+      '<span class="swatch" style="background:'+p.color+'"></span>'+
+      '<span class="fnm">'+esc(p.name)+'</span>'+
+      '<span class="fcount">'+doneN+'/'+p.tasks.length+'</span>'+
+      '<button class="icon-btn" onclick="event.stopPropagation();editProject(\''+p.id+'\')" title="Edit project"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></button>'+
+      '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M9 18l6-6-6-6"/></svg>'+
+    '</div>'+
+    '<div class="folder-body">'+
+      (p.tasks.length?'<ul class="tasklist">'+sorted.map(t=>{
+        const dueTag = t.due ? '<span class="tag" style="background:var(--accent-soft);color:var(--accent-deep)">'+prettyDate(t.due).replace(/, \d{4}$/,'')+'</span>' : '';
+        const timeTag = t.time ? '<span class="tag time">'+fmtTime(t.time)+'</span>' : '';
+        const meta = (dueTag||timeTag) ? '<div class="meta">'+dueTag+timeTag+'</div>' : '';
+        return '<li class="task'+(t.done?' done':'')+'">'+
+          '<div class="check" onclick="toggleProjTask(\''+p.id+'\',\''+t.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>'+
+          '<div class="body tap" onclick="editProjTask(\''+p.id+'\',\''+t.id+'\')"><div class="txt">'+esc(t.text)+'</div>'+meta+'</div></li>';
+      }).join('')+'</ul>':'<div class="muted" style="font-size:13px;padding:4px 2px">No tasks yet.</div>')+
+      '<div class="folder-add"><button class="btn btn-ghost btn-sm" style="width:100%" onclick="newProjTask(\''+p.id+'\')">+ New task</button></div>'+
+    '</div></div>';
+}
+function renderProjects(){
+  const wrap=document.getElementById('projectList'); if(!wrap) return;
+  if(!state.projects.length){ wrap.innerHTML='<div class="empty"><span>🗂</span>No projects yet. Create one to group related tasks.</div>'; return; }
+  const inProgress=state.projects.filter(p=>!projectDone(p));
+  const completed=state.projects.filter(p=>projectDone(p));
+  let h='<div class="bucket"><div class="bucket-h"><span class="lbl">In Progress</span><span class="cnt">'+inProgress.length+'</span></div>';
+  h+= inProgress.length ? inProgress.map(projectCard).join('') : '<div class="muted" style="font-size:13px;padding:2px 2px 4px">—</div>';
+  h+='</div><div class="bucket"><div class="bucket-h"><span class="lbl">Completed</span><span class="cnt">'+completed.length+'</span></div>';
+  h+= completed.length ? completed.map(projectCard).join('') : '<div class="muted" style="font-size:13px;padding:2px 2px 4px">—</div>';
+  h+='</div>';
+  wrap.innerHTML=h;
+}
+
+/* ============================================================
+   LISTS — folders of fixed items (no due dates, no progress)
+============================================================ */
+function toggleListOpen(id){ state.ui.openLists[id]=!state.ui.openLists[id]; save(); renderLists(); }
+function newList(){
+  openModal('New list',[{key:'name',label:'List name',type:'text',placeholder:'e.g. Packing, Groceries'}],vals=>{
+    if(!vals.name.trim()) return;
+    state.lists.push({id:uid(),name:vals.name.trim(),color:vals.color||FOLDER_COLORS[state.lists.length%FOLDER_COLORS.length],items:[]});
+    save(); renderLists();
+  },{color:FOLDER_COLORS[state.lists.length%FOLDER_COLORS.length]});
+}
+function editList(id){
+  const l=state.lists.find(x=>x.id===id); if(!l) return;
+  openModal('Edit list',[{key:'name',label:'List name',type:'text',value:l.name}],vals=>{
+    if(!vals.name.trim()) return; l.name=vals.name.trim(); if(vals.color)l.color=vals.color; save(); renderLists();
+  },{color:l.color, onDelete:()=>confirmModal('Delete "'+l.name+'" and its items?', ()=>delList(id))});
+}
+function delList(id){ state.lists=state.lists.filter(x=>x.id!==id); save(); renderLists(); }
+function newListItem(lid){
+  const l=state.lists.find(x=>x.id===lid); if(!l) return;
+  openModal('New item',[{key:'text',label:'Item',type:'text',placeholder:'Add an item'}],vals=>{
+    if(!vals.text.trim()) return;
+    l.items.push({id:uid(),text:vals.text.trim(),done:false});
+    state.ui.openLists[lid]=true; save(); renderLists();
+  });
+}
+function editListItem(lid,iid){
+  const l=state.lists.find(x=>x.id===lid); if(!l) return;
+  const it=l.items.find(x=>x.id===iid); if(!it) return;
+  openModal('Edit item',[{key:'text',label:'Item',type:'text',value:it.text}],vals=>{
+    if(!vals.text.trim()) return; it.text=vals.text.trim(); save(); renderLists();
+  },{onDelete:()=>confirmModal('Delete this item?', ()=>delListItem(lid,iid))});
+}
+function delListItem(lid,iid){ const l=state.lists.find(x=>x.id===lid); if(!l)return; l.items=l.items.filter(x=>x.id!==iid); save(); renderLists(); }
+function toggleListItem(lid,iid){ const l=state.lists.find(x=>x.id===lid); if(!l)return; const it=l.items.find(x=>x.id===iid); if(!it)return; it.done=!it.done; save(); renderLists(); }
+function listCard(l){
+  const open=state.ui.openLists[l.id];
+  return '<div class="folder'+(open?' open':'')+'">'+
+    '<div class="folder-h" onclick="toggleListOpen(\''+l.id+'\')">'+
+      '<span class="swatch" style="background:'+l.color+'"></span>'+
+      '<span class="fnm">'+esc(l.name)+'</span>'+
+      '<span class="fcount">'+l.items.length+'</span>'+
+      '<button class="icon-btn" onclick="event.stopPropagation();editList(\''+l.id+'\')" title="Edit list"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></button>'+
+      '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M9 18l6-6-6-6"/></svg>'+
+    '</div>'+
+    '<div class="folder-body">'+
+      (l.items.length?'<ul class="tasklist">'+l.items.map(it=>
+        '<li class="task'+(it.done?' done':'')+'">'+
+          '<div class="check" onclick="toggleListItem(\''+l.id+'\',\''+it.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>'+
+          '<div class="body tap" onclick="editListItem(\''+l.id+'\',\''+it.id+'\')"><div class="txt">'+esc(it.text)+'</div></div></li>'
+      ).join('')+'</ul>':'<div class="muted" style="font-size:13px;padding:4px 2px">No items yet.</div>')+
+      '<div class="folder-add"><button class="btn btn-ghost btn-sm" style="width:100%" onclick="newListItem(\''+l.id+'\')">+ New item</button></div>'+
+    '</div></div>';
+}
+function renderLists(){
+  const wrap=document.getElementById('listList'); if(!wrap) return;
+  if(!state.lists.length){ wrap.innerHTML='<div class="empty"><span>📋</span>No lists yet. Create one for checklists and references.</div>'; return; }
+  wrap.innerHTML=state.lists.map(listCard).join('');
+}
+
+/* ============================================================
    MODAL  (reusable form)  +  CONFIRM  +  TOAST
 ============================================================ */
-let modalSubmit=null, modalColor=null;
+let modalSubmit=null, modalColor=null, modalDelete=null;
 function openModal(title, fields, onSubmit, extra){
   modalSubmit=onSubmit; modalColor=extra&&extra.color?extra.color:null;
+  modalDelete=extra&&extra.onDelete?extra.onDelete:null;
   const box=document.getElementById('modalBox');
   let h='<h3>'+esc(title)+'</h3>';
   fields.forEach(f=>{
@@ -913,13 +1178,14 @@ function openModal(title, fields, onSubmit, extra){
     h+='<div class="mfield"><label class="fld">Color</label><div class="swatches">'+
       FOLDER_COLORS.map(c=>'<div class="sw'+(c===modalColor?' on':'')+'" style="background:'+c+'" data-c="'+c+'"></div>').join('')+'</div></div>';
   }
-  h+='<div class="mbtns"><button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="submitModal()">Save</button></div>';
+  h+='<div class="mbtns">'+(modalDelete?'<button class="btn btn-del" id="modalDeleteBtn">Delete</button>':'')+'<button class="btn btn-ghost" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="submitModal()">Save</button></div>';
   box.innerHTML=h;
   if(modalColor!==null){
     box.querySelectorAll('.sw').forEach(s=>s.onclick=()=>{
       box.querySelectorAll('.sw').forEach(x=>x.classList.remove('on')); s.classList.add('on'); modalColor=s.dataset.c;
     });
   }
+  if(modalDelete){ const db=box.querySelector('#modalDeleteBtn'); if(db) db.onclick=()=>{ const fn=modalDelete; fn(); }; }
   document.getElementById('modalBg').classList.add('show');
   const cb=box.querySelector('[data-disables]');
   if(cb){
@@ -936,7 +1202,7 @@ function submitModal(){
   if(modalColor!==null) vals.color=modalColor;
   const fn=modalSubmit; closeModal(); if(fn)fn(vals);
 }
-function closeModal(){ document.getElementById('modalBg').classList.remove('show'); modalSubmit=null; modalColor=null; }
+function closeModal(){ document.getElementById('modalBg').classList.remove('show'); modalSubmit=null; modalColor=null; modalDelete=null; }
 function confirmModal(msg,onYes){
   const box=document.getElementById('modalBox');
   box.innerHTML='<h3>Confirm</h3><p style="color:var(--ink-soft);font-size:15px;margin-bottom:8px">'+esc(msg)+'</p>'+
@@ -979,7 +1245,7 @@ function importData(e){
 /* ============================================================
    INIT
 ============================================================ */
-function renderAll(){ renderTodo(); renderHabits(); renderInsp(); renderDump(); }
+function renderAll(){ renderTodo(); renderHabits(); renderInsp(); renderDump(); renderProjects(); renderLists(); renderQuotes(); }
 function init(){
   rollover();
   stampHeader();
@@ -987,6 +1253,7 @@ function init(){
   toggleEod();
   fillCatSelect();
   renderAll();
+  setInspTab(state.ui.inspTab||'inspiration');
 }
 function enterApp(){
   var ss=document.getElementById('signinScreen'); if(ss)ss.style.display='none';
