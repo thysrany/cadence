@@ -425,6 +425,7 @@ label.fld{display:block;font-size:12px;font-weight:600;color:var(--ink-soft);mar
     <section class="section" id="tab-insp">
       <div class="subtabs" id="inspSubtabs">
         <button class="subtab on" data-sub="inspiration" onclick="setInspTab('inspiration')">Inspiration</button>
+        <button class="subtab" data-sub="rpm" onclick="setInspTab('rpm')">RPM</button>
         <button class="subtab" data-sub="quotes" onclick="setInspTab('quotes')">Quotes</button>
       </div>
 
@@ -433,6 +434,14 @@ label.fld{display:block;font-size:12px;font-weight:600;color:var(--ink-soft);mar
           <div class="card-h"><h2>Inspiration</h2><button class="btn btn-ghost btn-sm" onclick="newInsp()">+ Subject</button></div>
           <p class="muted" style="font-size:13px;margin-bottom:18px">A place for ideas, themes and notes worth keeping. Each subject has a title and a body. Tap one to edit it.</p>
           <div class="insp-grid" id="inspList"></div>
+        </div>
+      </div>
+
+      <div id="rpmPanel" style="display:none">
+        <div class="card">
+          <div class="card-h"><h2>RPM Sheets</h2><button class="btn btn-ghost btn-sm" onclick="newRpmSheet()">+ Sheet</button></div>
+          <p class="muted" style="font-size:13px;margin-bottom:18px">Result · Purpose · Massive Action Plan — one sheet per category. Tap a sheet to open it.</p>
+          <div id="rpmList"></div>
         </div>
       </div>
 
@@ -509,12 +518,13 @@ function defaultState(){
     habits: [],
     routineLog: {},          // { 'YYYY-MM-DD': [habitId,...] }
     inspirations: [],
+    rpmSheets: [],            // { id, name, result, purpose, actions:[{id,text,done}] }
     dumps: [],
     dumpCats: ['Idea','To-Do','Work','Personal','Random'],
     projects: [],            // { id, name, color, tasks:[{id,text,due,done,doneDate}] }
     lists: [],               // { id, name, color, items:[{id,text,done}] }
     meta: { lastOpen: today() },
-    ui: { whenSel:'today', dumpFilter:'All', openFolders:{}, openProjects:{}, openLists:{}, inspTab:'inspiration' }
+    ui: { whenSel:'today', dumpFilter:'All', openFolders:{}, openProjects:{}, openLists:{}, openRpm:{}, inspTab:'inspiration' }
   };
 }
 function load(){
@@ -896,6 +906,7 @@ function setInspTab(which){
   state.ui.inspTab=which; save();
   document.querySelectorAll('#inspSubtabs .subtab').forEach(b=>b.classList.toggle('on', b.dataset.sub===which));
   document.getElementById('inspPanel').style.display = which==='inspiration'?'block':'none';
+  document.getElementById('rpmPanel').style.display = which==='rpm'?'block':'none';
   document.getElementById('quotesPanel').style.display = which==='quotes'?'block':'none';
 }
 const QUOTES=[
@@ -942,6 +953,91 @@ function copyQuote(i){
   const done=()=>toast('Quote copied');
   if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(s).then(done).catch(fb); } else fb();
   function fb(){ try{ const ta=document.createElement('textarea'); ta.value=s; ta.style.cssText='position:fixed;opacity:0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); done(); }catch(e){ toast('Copy failed'); } }
+}
+
+/* ============================================================
+   RPM SHEETS  — Result · Purpose · Massive Action Plan
+   Accordion: each sheet expands/collapses independently,
+   reusing the same folder pattern as the Habit Library.
+============================================================ */
+function renderRPM(){
+  const wrap=document.getElementById('rpmList');
+  if(!state.rpmSheets.length){ wrap.innerHTML='<div class="empty"><span>◎</span>No sheets yet. Add a category to define its Result, Purpose and Action Plan.</div>'; return; }
+  wrap.innerHTML=state.rpmSheets.map(rpmCard).join('');
+}
+function rpmCard(sh){
+  const open=state.ui.openRpm[sh.id];
+  const doneN=sh.actions.filter(a=>a.done).length;
+  return '<div class="folder'+(open?' open':'')+'">'+
+    '<div class="folder-h" onclick="toggleRpmOpen(\''+sh.id+'\')">'+
+      '<span class="swatch" style="background:var(--accent)"></span>'+
+      '<span class="fnm">'+esc(sh.name)+'</span>'+
+      (sh.actions.length?'<span class="fcount">'+doneN+'/'+sh.actions.length+'</span>':'')+
+      '<button class="icon-btn" onclick="event.stopPropagation();editRpmName(\''+sh.id+'\')" title="Rename or delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></button>'+
+      '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M9 18l6-6-6-6"/></svg>'+
+    '</div>'+
+    '<div class="folder-body">'+
+      '<div class="mfield" style="margin-bottom:2px">'+
+        '<label class="fld" style="color:var(--accent-deep)">Result — what do I actually want?</label>'+
+        '<textarea rows="2" oninput="updateRpm(\''+sh.id+'\',\'result\',this.value)" placeholder="State the outcome as if it\'s already true.">'+esc(sh.result)+'</textarea>'+
+      '</div>'+
+      '<div class="mfield" style="margin-bottom:2px">'+
+        '<label class="fld">Purpose — why does this matter?</label>'+
+        '<textarea rows="2" oninput="updateRpm(\''+sh.id+'\',\'purpose\',this.value)" placeholder="This is the fuel. If it\'s weak, the plan won\'t survive a bad week.">'+esc(sh.purpose)+'</textarea>'+
+      '</div>'+
+      '<div class="mfield">'+
+        '<label class="fld">Massive Action Plan</label>'+
+        '<ul class="routine-list">'+
+          sh.actions.map(a=>
+            '<li class="r-item'+(a.done?' done':'')+'" style="cursor:default">'+
+              '<div class="check" onclick="toggleRpmAction(\''+sh.id+'\',\''+a.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>'+
+              '<span class="nm">'+esc(a.text)+'</span>'+
+              '<button class="icon-btn" onclick="delRpmAction(\''+sh.id+'\',\''+a.id+'\')" title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>'+
+            '</li>'
+          ).join('')+
+        '</ul>'+
+        '<div class="folder-add">'+
+          '<input type="text" id="rpmAdd-'+sh.id+'" placeholder="Add an action that moves this result forward…" onkeydown="if(event.key===\'Enter\'){addRpmAction(\''+sh.id+'\', this.value); this.value=\'\';}">'+
+        '</div>'+
+      '</div>'+
+    '</div></div>';
+}
+function toggleRpmOpen(id){ state.ui.openRpm[id]=!state.ui.openRpm[id]; save(); renderRPM(); }
+function newRpmSheet(){
+  openModal('New RPM sheet',[{key:'name',label:'Category',type:'text',placeholder:'e.g. ScheduleINT, Health, Finances'}],vals=>{
+    if(!vals.name.trim()) return;
+    const sh={id:uid(),name:vals.name.trim(),result:'',purpose:'',actions:[]};
+    state.rpmSheets.push(sh);
+    state.ui.openRpm[sh.id]=true;
+    save(); renderRPM();
+  });
+}
+function editRpmName(id){
+  const sh=state.rpmSheets.find(x=>x.id===id); if(!sh) return;
+  openModal('Rename sheet',[{key:'name',label:'Category',type:'text',value:sh.name}],vals=>{
+    if(!vals.name.trim()) return; sh.name=vals.name.trim(); save(); renderRPM();
+  },{onDelete:()=>confirmModal('Delete "'+sh.name+'" and its RPM sheet? This can\'t be undone.', ()=>delRpmSheet(id))});
+}
+function delRpmSheet(id){ state.rpmSheets=state.rpmSheets.filter(x=>x.id!==id); save(); renderRPM(); }
+function updateRpm(id,field,val){
+  const sh=state.rpmSheets.find(x=>x.id===id); if(!sh) return;
+  sh[field]=val; save();
+}
+function addRpmAction(id,text){
+  text=(text||'').trim(); if(!text) return;
+  const sh=state.rpmSheets.find(x=>x.id===id); if(!sh) return;
+  sh.actions.push({id:uid(),text,done:false});
+  save(); renderRPM();
+  const inp=document.getElementById('rpmAdd-'+id); if(inp) inp.focus();
+}
+function toggleRpmAction(sid,aid){
+  const sh=state.rpmSheets.find(x=>x.id===sid); if(!sh) return;
+  const a=sh.actions.find(x=>x.id===aid); if(!a) return;
+  a.done=!a.done; save(); renderRPM();
+}
+function delRpmAction(sid,aid){
+  const sh=state.rpmSheets.find(x=>x.id===sid); if(!sh) return;
+  sh.actions=sh.actions.filter(x=>x.id!==aid); save(); renderRPM();
 }
 
 /* ============================================================
@@ -1249,7 +1345,7 @@ function importData(e){
 /* ============================================================
    INIT
 ============================================================ */
-function renderAll(){ renderTodo(); renderHabits(); renderInsp(); renderDump(); renderProjects(); renderLists(); renderQuotes(); }
+function renderAll(){ renderTodo(); renderHabits(); renderInsp(); renderRPM(); renderDump(); renderProjects(); renderLists(); renderQuotes(); }
 function init(){
   rollover();
   stampHeader();
