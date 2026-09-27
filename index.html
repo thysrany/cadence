@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<!-- Cadence build v8 · 2026-06-01 · favicon -->
+<!-- Cadence build v9 · 2026-06-02 · goals (RPM) -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cadence · Daily Productivity (v8)</title>
+<title>Cadence · Daily Productivity (v9)</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+CjxyZWN0IHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgcng9IjE1IiBmaWxsPSIjQ0U1MzI2Ii8+CjxwYXRoIGQ9Ik00NCAyMi41Yy0yLjYtMy02LjQtNC45LTEwLjgtNC45LTggMC0xNCA2LjItMTQgMTQuNHM2IDE0LjQgMTQgMTQuNGM0LjQgMCA4LjItMS45IDEwLjgtNC45IiBmaWxsPSJub25lIiBzdHJva2U9IiNGMUVBREUiIHN0cm9rZS13aWR0aD0iNi40IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPGNpcmNsZSBjeD0iNDUuNSIgY3k9IjQ0LjUiIHI9IjQuNCIgZmlsbD0iI0YxRUFERSIvPgo8L3N2Zz4=">
 <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+CjxyZWN0IHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgcng9IjE1IiBmaWxsPSIjQ0U1MzI2Ii8+CjxwYXRoIGQ9Ik00NCAyMi41Yy0yLjYtMy02LjQtNC45LTEwLjgtNC45LTggMC0xNCA2LjItMTQgMTQuNHM2IDE0LjQgMTQgMTQuNGM0LjQgMCA4LjItMS45IDEwLjgtNC45IiBmaWxsPSJub25lIiBzdHJva2U9IiNGMUVBREUiIHN0cm9rZS13aWR0aD0iNi40IiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPGNpcmNsZSBjeD0iNDUuNSIgY3k9IjQ0LjUiIHI9IjQuNCIgZmlsbD0iI0YxRUFERSIvPgo8L3N2Zz4=">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -233,6 +233,9 @@ label.fld{display:block;font-size:12px;font-weight:600;color:var(--ink-soft);mar
 /* ===== TAP-TO-EDIT / DELETE-IN-DIALOG / SUBTABS / QUOTES ===== */
 .tap{cursor:pointer}
 .task .body.tap:hover .txt{color:var(--accent-deep)}
+.goal-head{display:flex;flex-direction:column;gap:1px;min-width:0}
+.goal-head .goal-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.goal-head .goal-why{font-size:11.5px;font-weight:500;font-style:italic;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:0}
 .hnm.tap{cursor:pointer}
 .hnm.tap:hover{color:var(--accent)}
 .insp.tap{cursor:pointer}
@@ -306,7 +309,7 @@ label.fld{display:block;font-size:12px;font-weight:600;color:var(--ink-soft);mar
     </button>
     <div class="note" id="signinNote"></div>
     <div class="spin" id="signinSpin">Signing in…</div>
-    <div class="fine">Your tasks and habits sync to your Google account, so they're there on any device you sign in from.</div><div class="fine" style="margin-top:6px;opacity:.7">version 8</div>
+    <div class="fine">Your tasks and habits sync to your Google account, so they're there on any device you sign in from.</div><div class="fine" style="margin-top:6px;opacity:.7">version 9</div>
   </div>
 </div>
 <div class="wrap" id="appWrap" style="display:none">
@@ -327,7 +330,9 @@ label.fld{display:block;font-size:12px;font-weight:600;color:var(--ink-soft);mar
   </header>
 
   <nav>
-    <button class="tab-btn active" data-tab="todo" onclick="switchTab('todo')">
+    <button class="tab-btn active" data-tab="projects" onclick="switchTab('projects')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4"/></svg>Goals</button>
+    <button class="tab-btn" data-tab="todo" onclick="switchTab('todo')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>To-Do</button>
     <button class="tab-btn" data-tab="habits" onclick="switchTab('habits')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>Habits</button>
@@ -335,15 +340,13 @@ label.fld{display:block;font-size:12px;font-weight:600;color:var(--ink-soft);mar
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 00-4 12.74c.5.4.9 1 1 1.6V18h6v-1.66c.1-.6.5-1.2 1-1.6A7 7 0 0012 2z"/></svg>Inspiration</button>
     <button class="tab-btn" data-tab="dump" onclick="switchTab('dump')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a9 9 0 00-9 9c0 4 3 7 5 8v2h8v-2c2-1 5-4 5-8a9 9 0 00-9-9z"/><path d="M9 21h6"/></svg>Brain Dump</button>
-    <button class="tab-btn" data-tab="projects" onclick="switchTab('projects')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>Projects</button>
     <button class="tab-btn" data-tab="lists" onclick="switchTab('lists')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>Lists</button>
   </nav>
 
   <main>
     <!-- ============ TO-DO ============ -->
-    <section class="section active" id="tab-todo">
+    <section class="section" id="tab-todo">
       <div class="card">
         <div class="eyebrow" style="margin-bottom:14px">Add a task</div>
         <div class="todo-add">
@@ -425,7 +428,6 @@ label.fld{display:block;font-size:12px;font-weight:600;color:var(--ink-soft);mar
     <section class="section" id="tab-insp">
       <div class="subtabs" id="inspSubtabs">
         <button class="subtab on" data-sub="inspiration" onclick="setInspTab('inspiration')">Inspiration</button>
-        <button class="subtab" data-sub="rpm" onclick="setInspTab('rpm')">RPM</button>
         <button class="subtab" data-sub="quotes" onclick="setInspTab('quotes')">Quotes</button>
       </div>
 
@@ -434,14 +436,6 @@ label.fld{display:block;font-size:12px;font-weight:600;color:var(--ink-soft);mar
           <div class="card-h"><h2>Inspiration</h2><button class="btn btn-ghost btn-sm" onclick="newInsp()">+ Subject</button></div>
           <p class="muted" style="font-size:13px;margin-bottom:18px">A place for ideas, themes and notes worth keeping. Each subject has a title and a body. Tap one to edit it.</p>
           <div class="insp-grid" id="inspList"></div>
-        </div>
-      </div>
-
-      <div id="rpmPanel" style="display:none">
-        <div class="card">
-          <div class="card-h"><h2>RPM Sheets</h2><button class="btn btn-ghost btn-sm" onclick="newRpmSheet()">+ Sheet</button></div>
-          <p class="muted" style="font-size:13px;margin-bottom:18px">Result · Purpose · Massive Action Plan — one sheet per category. Tap a sheet to open it.</p>
-          <div id="rpmList"></div>
         </div>
       </div>
 
@@ -476,10 +470,10 @@ label.fld{display:block;font-size:12px;font-weight:600;color:var(--ink-soft);mar
     </section>
 
     <!-- ============ PROJECTS ============ -->
-    <section class="section" id="tab-projects">
+    <section class="section active" id="tab-projects">
       <div class="card">
-        <div class="card-h"><h2>Projects</h2><button class="btn btn-ghost btn-sm" onclick="newProject()">+ Project</button></div>
-        <p class="muted" style="font-size:13px;margin-bottom:16px">Group related tasks. Give a task a due date and it shows up in your To-Do; leave it blank and it just lives here. A project moves to <b>Completed</b> once every task is done.</p>
+        <div class="card-h"><h2>Goals</h2><button class="btn btn-ghost btn-sm" onclick="newProject()">+ Goal</button></div>
+        <p class="muted" style="font-size:13px;margin-bottom:16px">Your outcomes, and the steps to reach them. Give a step a due date and it shows up in your To-Do; leave it blank and it just lives under the goal. A goal moves to <b>Achieved</b> once every step is done.</p>
         <div id="projectList"></div>
       </div>
     </section>
@@ -518,13 +512,12 @@ function defaultState(){
     habits: [],
     routineLog: {},          // { 'YYYY-MM-DD': [habitId,...] }
     inspirations: [],
-    rpmSheets: [],            // { id, name, result, purpose, actions:[{id,text,done}] }
     dumps: [],
     dumpCats: ['Idea','To-Do','Work','Personal','Random'],
     projects: [],            // { id, name, color, tasks:[{id,text,due,done,doneDate}] }
     lists: [],               // { id, name, color, items:[{id,text,done}] }
     meta: { lastOpen: today() },
-    ui: { whenSel:'today', dumpFilter:'All', openFolders:{}, openProjects:{}, openLists:{}, openRpm:{}, inspTab:'inspiration' }
+    ui: { whenSel:'today', dumpFilter:'All', openFolders:{}, openProjects:{}, openLists:{}, inspTab:'inspiration' }
   };
 }
 function load(){
@@ -906,7 +899,6 @@ function setInspTab(which){
   state.ui.inspTab=which; save();
   document.querySelectorAll('#inspSubtabs .subtab').forEach(b=>b.classList.toggle('on', b.dataset.sub===which));
   document.getElementById('inspPanel').style.display = which==='inspiration'?'block':'none';
-  document.getElementById('rpmPanel').style.display = which==='rpm'?'block':'none';
   document.getElementById('quotesPanel').style.display = which==='quotes'?'block':'none';
 }
 const QUOTES=[
@@ -953,91 +945,6 @@ function copyQuote(i){
   const done=()=>toast('Quote copied');
   if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(s).then(done).catch(fb); } else fb();
   function fb(){ try{ const ta=document.createElement('textarea'); ta.value=s; ta.style.cssText='position:fixed;opacity:0'; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); done(); }catch(e){ toast('Copy failed'); } }
-}
-
-/* ============================================================
-   RPM SHEETS  — Result · Purpose · Massive Action Plan
-   Accordion: each sheet expands/collapses independently,
-   reusing the same folder pattern as the Habit Library.
-============================================================ */
-function renderRPM(){
-  const wrap=document.getElementById('rpmList');
-  if(!state.rpmSheets.length){ wrap.innerHTML='<div class="empty"><span>◎</span>No sheets yet. Add a category to define its Result, Purpose and Action Plan.</div>'; return; }
-  wrap.innerHTML=state.rpmSheets.map(rpmCard).join('');
-}
-function rpmCard(sh){
-  const open=state.ui.openRpm[sh.id];
-  const doneN=sh.actions.filter(a=>a.done).length;
-  return '<div class="folder'+(open?' open':'')+'">'+
-    '<div class="folder-h" onclick="toggleRpmOpen(\''+sh.id+'\')">'+
-      '<span class="swatch" style="background:var(--accent)"></span>'+
-      '<span class="fnm">'+esc(sh.name)+'</span>'+
-      (sh.actions.length?'<span class="fcount">'+doneN+'/'+sh.actions.length+'</span>':'')+
-      '<button class="icon-btn" onclick="event.stopPropagation();editRpmName(\''+sh.id+'\')" title="Rename or delete"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></button>'+
-      '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M9 18l6-6-6-6"/></svg>'+
-    '</div>'+
-    '<div class="folder-body">'+
-      '<div class="mfield" style="margin-bottom:2px">'+
-        '<label class="fld" style="color:var(--accent-deep)">Result — what do I actually want?</label>'+
-        '<textarea rows="2" oninput="updateRpm(\''+sh.id+'\',\'result\',this.value)" placeholder="State the outcome as if it\'s already true.">'+esc(sh.result)+'</textarea>'+
-      '</div>'+
-      '<div class="mfield" style="margin-bottom:2px">'+
-        '<label class="fld">Purpose — why does this matter?</label>'+
-        '<textarea rows="2" oninput="updateRpm(\''+sh.id+'\',\'purpose\',this.value)" placeholder="This is the fuel. If it\'s weak, the plan won\'t survive a bad week.">'+esc(sh.purpose)+'</textarea>'+
-      '</div>'+
-      '<div class="mfield">'+
-        '<label class="fld">Massive Action Plan</label>'+
-        '<ul class="routine-list">'+
-          sh.actions.map(a=>
-            '<li class="r-item'+(a.done?' done':'')+'" style="cursor:default">'+
-              '<div class="check" onclick="toggleRpmAction(\''+sh.id+'\',\''+a.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>'+
-              '<span class="nm">'+esc(a.text)+'</span>'+
-              '<button class="icon-btn" onclick="delRpmAction(\''+sh.id+'\',\''+a.id+'\')" title="Remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg></button>'+
-            '</li>'
-          ).join('')+
-        '</ul>'+
-        '<div class="folder-add">'+
-          '<input type="text" id="rpmAdd-'+sh.id+'" placeholder="Add an action that moves this result forward…" onkeydown="if(event.key===\'Enter\'){addRpmAction(\''+sh.id+'\', this.value); this.value=\'\';}">'+
-        '</div>'+
-      '</div>'+
-    '</div></div>';
-}
-function toggleRpmOpen(id){ state.ui.openRpm[id]=!state.ui.openRpm[id]; save(); renderRPM(); }
-function newRpmSheet(){
-  openModal('New RPM sheet',[{key:'name',label:'Category',type:'text',placeholder:'e.g. ScheduleINT, Health, Finances'}],vals=>{
-    if(!vals.name.trim()) return;
-    const sh={id:uid(),name:vals.name.trim(),result:'',purpose:'',actions:[]};
-    state.rpmSheets.push(sh);
-    state.ui.openRpm[sh.id]=true;
-    save(); renderRPM();
-  });
-}
-function editRpmName(id){
-  const sh=state.rpmSheets.find(x=>x.id===id); if(!sh) return;
-  openModal('Rename sheet',[{key:'name',label:'Category',type:'text',value:sh.name}],vals=>{
-    if(!vals.name.trim()) return; sh.name=vals.name.trim(); save(); renderRPM();
-  },{onDelete:()=>confirmModal('Delete "'+sh.name+'" and its RPM sheet? This can\'t be undone.', ()=>delRpmSheet(id))});
-}
-function delRpmSheet(id){ state.rpmSheets=state.rpmSheets.filter(x=>x.id!==id); save(); renderRPM(); }
-function updateRpm(id,field,val){
-  const sh=state.rpmSheets.find(x=>x.id===id); if(!sh) return;
-  sh[field]=val; save();
-}
-function addRpmAction(id,text){
-  text=(text||'').trim(); if(!text) return;
-  const sh=state.rpmSheets.find(x=>x.id===id); if(!sh) return;
-  sh.actions.push({id:uid(),text,done:false});
-  save(); renderRPM();
-  const inp=document.getElementById('rpmAdd-'+id); if(inp) inp.focus();
-}
-function toggleRpmAction(sid,aid){
-  const sh=state.rpmSheets.find(x=>x.id===sid); if(!sh) return;
-  const a=sh.actions.find(x=>x.id===aid); if(!a) return;
-  a.done=!a.done; save(); renderRPM();
-}
-function delRpmAction(sid,aid){
-  const sh=state.rpmSheets.find(x=>x.id===sid); if(!sh) return;
-  sh.actions=sh.actions.filter(x=>x.id!==aid); save(); renderRPM();
 }
 
 /* ============================================================
@@ -1114,23 +1021,29 @@ function manageCats(){
 function projectDone(p){ return p.tasks.length>0 && p.tasks.every(t=>t.done); }
 function toggleProjOpen(id){ state.ui.openProjects[id]=!state.ui.openProjects[id]; save(); renderProjects(); }
 function newProject(){
-  openModal('New project',[{key:'name',label:'Project name',type:'text',placeholder:'e.g. Website launch'}],vals=>{
+  openModal('New goal',[
+    {key:'name',label:'Goal — your desired result',type:'text',placeholder:'e.g. Launch the new website'},
+    {key:'purpose',label:'Purpose — your why (optional)',type:'text',placeholder:'Why does this matter to you?'}
+  ],vals=>{
     if(!vals.name.trim()) return;
-    state.projects.push({id:uid(),name:vals.name.trim(),color:vals.color||FOLDER_COLORS[state.projects.length%FOLDER_COLORS.length],tasks:[]});
+    state.projects.push({id:uid(),name:vals.name.trim(),purpose:(vals.purpose||'').trim(),color:vals.color||FOLDER_COLORS[state.projects.length%FOLDER_COLORS.length],tasks:[]});
     save(); renderProjects();
   },{color:FOLDER_COLORS[state.projects.length%FOLDER_COLORS.length]});
 }
 function editProject(id){
   const p=state.projects.find(x=>x.id===id); if(!p) return;
-  openModal('Edit project',[{key:'name',label:'Project name',type:'text',value:p.name}],vals=>{
-    if(!vals.name.trim()) return; p.name=vals.name.trim(); if(vals.color)p.color=vals.color; save(); renderProjects(); renderTodo();
-  },{color:p.color, onDelete:()=>confirmModal('Delete "'+p.name+'" and all its tasks?', ()=>delProject(id))});
+  openModal('Edit goal',[
+    {key:'name',label:'Goal — your desired result',type:'text',value:p.name},
+    {key:'purpose',label:'Purpose — your why (optional)',type:'text',value:p.purpose||''}
+  ],vals=>{
+    if(!vals.name.trim()) return; p.name=vals.name.trim(); p.purpose=(vals.purpose||'').trim(); if(vals.color)p.color=vals.color; save(); renderProjects(); renderTodo();
+  },{color:p.color, onDelete:()=>confirmModal('Delete "'+p.name+'" and all its steps?', ()=>delProject(id))});
 }
 function delProject(id){ state.projects=state.projects.filter(x=>x.id!==id); save(); renderProjects(); renderTodo(); }
 function newProjTask(pid){
   const p=state.projects.find(x=>x.id===pid); if(!p) return;
-  openModal('New task',[
-    {key:'text',label:'Task',type:'text',placeholder:'What needs doing?'},
+  openModal('New step',[
+    {key:'text',label:'Step',type:'text',placeholder:'What action moves this forward?'},
     {key:'due',label:'Due date — optional (adds it to your To-Do)',type:'date',value:''},
     {key:'time',label:'Time — optional (orders it in your To-Do)',type:'time',value:''}
   ],vals=>{
@@ -1142,14 +1055,14 @@ function newProjTask(pid){
 function editProjTask(pid,tid){
   const p=state.projects.find(x=>x.id===pid); if(!p) return;
   const t=p.tasks.find(x=>x.id===tid); if(!t) return;
-  openModal('Edit task',[
-    {key:'text',label:'Task',type:'text',value:t.text},
+  openModal('Edit step',[
+    {key:'text',label:'Step',type:'text',value:t.text},
     {key:'due',label:'Due date — optional (adds it to your To-Do)',type:'date',value:t.due||''},
     {key:'time',label:'Time — optional (orders it in your To-Do)',type:'time',value:t.time||''}
   ],vals=>{
     if(!vals.text.trim()) return;
     t.text=vals.text.trim(); t.due=vals.due||null; t.time=vals.time||null; save(); renderProjects(); renderTodo();
-  },{onDelete:()=>confirmModal('Delete this task?', ()=>delProjTask(pid,tid))});
+  },{onDelete:()=>confirmModal('Delete this step?', ()=>delProjTask(pid,tid))});
 }
 function delProjTask(pid,tid){ const p=state.projects.find(x=>x.id===pid); if(!p)return; p.tasks=p.tasks.filter(x=>x.id!==tid); save(); renderProjects(); renderTodo(); }
 function toggleProjTask(pid,tid){
@@ -1164,9 +1077,12 @@ function projectCard(p){
   return '<div class="folder'+(open?' open':'')+'">'+
     '<div class="folder-h" onclick="toggleProjOpen(\''+p.id+'\')">'+
       '<span class="swatch" style="background:'+p.color+'"></span>'+
-      '<span class="fnm">'+esc(p.name)+'</span>'+
+      '<span class="fnm goal-head">'+
+        '<span class="goal-name">'+esc(p.name)+'</span>'+
+        (p.purpose?'<span class="goal-why">'+esc(p.purpose)+'</span>':'')+
+      '</span>'+
       '<span class="fcount">'+doneN+'/'+p.tasks.length+'</span>'+
-      '<button class="icon-btn" onclick="event.stopPropagation();editProject(\''+p.id+'\')" title="Edit project"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></button>'+
+      '<button class="icon-btn" onclick="event.stopPropagation();editProject(\''+p.id+'\')" title="Edit goal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg></button>'+
       '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M9 18l6-6-6-6"/></svg>'+
     '</div>'+
     '<div class="folder-body">'+
@@ -1177,18 +1093,18 @@ function projectCard(p){
         return '<li class="task'+(t.done?' done':'')+'">'+
           '<div class="check" onclick="toggleProjTask(\''+p.id+'\',\''+t.id+'\')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>'+
           '<div class="body tap" onclick="editProjTask(\''+p.id+'\',\''+t.id+'\')"><div class="txt">'+esc(t.text)+'</div>'+meta+'</div></li>';
-      }).join('')+'</ul>':'<div class="muted" style="font-size:13px;padding:4px 2px">No tasks yet.</div>')+
-      '<div class="folder-add"><button class="btn btn-ghost btn-sm" style="width:100%" onclick="newProjTask(\''+p.id+'\')">+ New task</button></div>'+
+      }).join('')+'</ul>':'<div class="muted" style="font-size:13px;padding:4px 2px">No steps yet.</div>')+
+      '<div class="folder-add"><button class="btn btn-ghost btn-sm" style="width:100%" onclick="newProjTask(\''+p.id+'\')">+ New step</button></div>'+
     '</div></div>';
 }
 function renderProjects(){
   const wrap=document.getElementById('projectList'); if(!wrap) return;
-  if(!state.projects.length){ wrap.innerHTML='<div class="empty"><span>🗂</span>No projects yet. Create one to group related tasks.</div>'; return; }
+  if(!state.projects.length){ wrap.innerHTML='<div class="empty"><span>🎯</span>No goals yet. Set one and list the steps to reach it.</div>'; return; }
   const inProgress=state.projects.filter(p=>!projectDone(p));
   const completed=state.projects.filter(p=>projectDone(p));
   let h='<div class="bucket"><div class="bucket-h"><span class="lbl">In Progress</span><span class="cnt">'+inProgress.length+'</span></div>';
   h+= inProgress.length ? inProgress.map(projectCard).join('') : '<div class="muted" style="font-size:13px;padding:2px 2px 4px">—</div>';
-  h+='</div><div class="bucket"><div class="bucket-h"><span class="lbl">Completed</span><span class="cnt">'+completed.length+'</span></div>';
+  h+='</div><div class="bucket"><div class="bucket-h"><span class="lbl">Achieved</span><span class="cnt">'+completed.length+'</span></div>';
   h+= completed.length ? completed.map(projectCard).join('') : '<div class="muted" style="font-size:13px;padding:2px 2px 4px">—</div>';
   h+='</div>';
   wrap.innerHTML=h;
@@ -1345,7 +1261,7 @@ function importData(e){
 /* ============================================================
    INIT
 ============================================================ */
-function renderAll(){ renderTodo(); renderHabits(); renderInsp(); renderRPM(); renderDump(); renderProjects(); renderLists(); renderQuotes(); }
+function renderAll(){ renderTodo(); renderHabits(); renderInsp(); renderDump(); renderProjects(); renderLists(); renderQuotes(); }
 function init(){
   rollover();
   stampHeader();
